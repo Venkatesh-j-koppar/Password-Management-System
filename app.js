@@ -58,12 +58,7 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
-  res.status(400).json({
-    error:"Page Not Found"
-  })
-  res.status(500).json({
-    error:"Internal Server Error"
-  })
+  
 
   
 

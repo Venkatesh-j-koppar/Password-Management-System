@@ -2,45 +2,45 @@ var express=require("express");
 const productModel = require("../modules/products");
 var router=express.Router();
 const mongoose=require('mongoose');
-const multer  = require('multer')
+var checkauth=require('./middleware/auth')
 
-
-const storage = multer.diskStorage(
-    {
-   
+const multer  = require('multer');
+const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, './public/uploads')
+      cb(null, './public/uploads/')
     },
     filename: function (req, file, cb) {
-     
-      cb(null,  Date.now()+file.originalname);
-    }
+
+      cb(null, Date.now()+file.originalname);
+    },
+    fileFilter:fileFilter
   })
 
-
-  const fileFilter=(req,file,cb)=>{
-     
-    
-      if(file.mimetype==='image/png' || file.mimetype==='image/jpg' || file.mimetype==='image/jpeg'){
-
-          
+  function fileFilter(req,res,cb){
+      if(mimetype==="image/png" || mimetype==="image/jpg" || mimetype==="image/pdf"){
           cb(null,true);
       }
       else{
-      
-          cb(null,false)
+          cb(null,false);
       }
 
-
   }
-  const upload = multer({
-    storage:storage,
+
+const upload = multer({ 
+    storage: storage,
     limits:{
         fileSize:1024*1024*5
-    },
-    fileFilter:fileFilter
-    
-    })
+    }
+
+});
+
+
+
+
+
+
+
+  
 
 
 
@@ -69,9 +69,9 @@ exec().then(
 
 });
 
-router.post("/add",upload.single('productImage'),function(req,res,next){
+router.post("/add",checkauth,upload.single('productImage'),function(req,res,next){
 
- console.log(req.file)
+console.log(req.file)
 
     var product_name=req.body.pname;
     var price=req.body.price;

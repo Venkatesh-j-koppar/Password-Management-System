@@ -4,54 +4,55 @@ var router=express.Router();
 const mongoose=require('mongoose');
 const userModel=require('../modules/user');
 const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+
 
 router.post("/login",function(req,res,next){
+
     var username=req.body.username;
     var password=req.body.password;
-    userModel.find({username:username}).exec().
-    then(user=>{
-        if(user.length<1)
-        {
-            res.status(404).json({
-            message:"user NotExist",
-          
-        
-        })
 
+
+    userModel.find({username:username})
+    .exec()
+    .then(user=>{
+        if(user.length<1){
+            res.status(404).json({
+                message:"Username and Password Didnot match",
+            })
         }
         else{
-            bcrypt.compare(password, user[0].password, function(err, result) {
-                if(err){
+        bcrypt.compare(password, user[0].password, function(err, result) {
+                if(err) {
                     res.status(404).json({
-                        message:"Authentication Failed",
-                      
-                    
-                    });
-
-                if(result){
-                    res.status(201).json({
-                        message:"User found",
-                        user:user
+                        message:"username and password didnot match"
                     })
+                }
+                if(result){
+                    var token=jwt.sign({
+                        username:user[0].username,
+                        userid:user[0].id
 
+                    },'secret', {
+                        expiresIn:"1h"
+                    })
+                    res.status(201).json({
+                        message:"User Found",
+                        token:token
+                    })
                 }
                 else{
                     res.status(404).json({
-                        message:"Auth Failed"
+                        message:"username and password didnot match"
                     })
                 }
-
-                }
             });
-        res.status(201).json({
-            message:"user Exist",
-            user:user
         
-        })
     }
-    }).
-    catch(err=>{
-        res.json({error:err})
+    }).catch(err=>{
+        res.json({
+            error:err
+        })
     })
 
 });
@@ -65,8 +66,7 @@ router.post("/signup",function(req,res,next){
     var confirmPassword=req.body.confirmpassword;
 
 if(password!==confirmPassword){
-    console.log(password);
-    console.log(confirmPassword);
+    
  res.json({
      message:"Password didnot match"
  })
@@ -98,7 +98,8 @@ else{
                         result:doc
                     })
                 }).catch(err=>{
-                    res.json(err);
+                    const er=err+err.errmsg;
+                    res.json(er);
                     })
 
         }
